@@ -1079,9 +1079,9 @@ function CommentsSection({ event, username }) {
     setComments(next);
     setText('');
     // Persist to shared storage
-    const all = await sGet('tl-events-v4') || [];
+    const all = await sGet('tl-events-v7') || [];
     const updated = all.map(e => e.id === event.id ? {...e, comments: next} : e);
-    sSet('tl-events-v4', updated);
+    sSet('tl-events-v7', updated);
   };
 
   const timeAgo = (iso) => {
@@ -1696,8 +1696,16 @@ export default function TheList() {
   useEffect(() => {
     if (!username) return;
     (async () => {
-      const saved = await sGet("tl-events-v6");
-      const base = (saved && saved.length) ? saved : SEED_EVENTS;
+      const saved = await sGet("tl-events-v7");
+      let base;
+      if (saved && saved.length) {
+        // Merge: keep saved events, add any new seed events not yet in storage
+        const savedIds = new Set(saved.map(e => e.id));
+        const newSeeds = SEED_EVENTS.filter(e => !savedIds.has(e.id));
+        base = newSeeds.length ? [...saved, ...newSeeds] : saved;
+      } else {
+        base = SEED_EVENTS;
+      }
       setEvents(base);
       const savedVenues = await sGet("tl-venues-v1");
       if (savedVenues && savedVenues.length) setCustomVenues(savedVenues);
@@ -1714,14 +1722,14 @@ export default function TheList() {
           }
         }));
         setEvents([...updated]);
-        sSet("tl-events-v6", updated);
+        sSet("tl-events-v7", updated);
       }
     })();
   }, [username]);
 
   // Persist events
   useEffect(() => {
-    if (loaded) sSet("tl-events-v6", events);
+    if (loaded) sSet("tl-events-v7", events);
   }, [events, loaded]);
   useEffect(() => { if (loaded) sSet("tl-venues-v1", customVenues); }, [customVenues, loaded]);
 
