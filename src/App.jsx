@@ -584,6 +584,30 @@ const fmt = (d) => {
 };
 const isPast = (d) => new Date(d+"T23:59:59") < new Date();
 
+// ── SHARE EVENT ───────────────────────────────────────────────────────
+async function shareEvent(event) {
+  const parts = [
+    event.title,
+    `${event.venue} · ${fmt(event.date)}${event.time ? ' at ' + event.time : ''}`,
+    event.price ? `Tickets: ${event.price}` : null,
+    event.blurb || null,
+    event.url || window.location.href,
+  ].filter(Boolean);
+  const text = parts.join('\n');
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: event.title, text, url: event.url || window.location.href });
+      return true;
+    } catch (e) {
+      if (e.name === 'AbortError') return false;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch { return false; }
+}
+
 // ── ONBOARDING ────────────────────────────────────────────────────────
 function Onboarding({ onJoin }) {
   const [name, setName] = useState("");
@@ -653,6 +677,12 @@ function EventCard({ event, username, onOpen }) {
   const past  = isPast(event.date);
   const [imgErr, setImgErr] = useState(false);
   const hasImg = event.image && !imgErr;
+  const [didShare, setDidShare] = useState(false);
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    const ok = await shareEvent(event);
+    if (ok) { setDidShare(true); setTimeout(() => setDidShare(false), 2000); }
+  };
 
   return (
     <div className="event-card" onClick={()=>onOpen(event)} style={{
@@ -751,9 +781,16 @@ function EventCard({ event, username, onOpen }) {
               </span>
             )}
           </div>
-          <div style={{flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             {iGo && <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"var(--sage)",letterSpacing:"0.08em"}}>GOING</span>}
             {iInt&&!iGo && <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"var(--slate)",letterSpacing:"0.08em"}}>INTERESTED</span>}
+            <button onClick={handleShare} title={didShare ? "Copied!" : "Share"} style={{
+              background:"none",border:"none",cursor:"pointer",padding:2,
+              color:didShare ? "var(--sage)" : "var(--muted)",
+              display:"flex",alignItems:"center",transition:"color .2s",
+            }}>
+              <Icon name={didShare ? "check" : "share"} size={13}/>
+            </button>
           </div>
         </div>
       </div>
@@ -768,6 +805,11 @@ function EventModal({ event, username, onClose, onRsvp }) {
   const inter = event.interested||[];
   const iGo   = going.includes(username);
   const iInt  = inter.includes(username);
+  const [didShare, setDidShare] = useState(false);
+  const handleShare = async () => {
+    const ok = await shareEvent(event);
+    if (ok) { setDidShare(true); setTimeout(() => setDidShare(false), 2000); }
+  };
 
   return (
     <div onClick={onClose} style={{
@@ -932,6 +974,19 @@ function EventModal({ event, username, onClose, onRsvp }) {
               })()}
             </div>
           )}
+
+          {/* ── SHARE ── */}
+          <button onClick={handleShare} style={{
+            display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+            width:"100%",minHeight:44,marginBottom:8,
+            background:"transparent",border:"1.5px solid var(--line)",
+            color: didShare ? "var(--sage)" : "var(--ink)",
+            fontFamily:"'DM Mono',monospace",fontSize:11,letterSpacing:"0.12em",
+            textTransform:"uppercase",cursor:"pointer",transition:"all .2s",
+          }}>
+            <Icon name={didShare ? "check" : "share"} size={13} color={didShare ? "var(--sage)" : "currentColor"}/>
+            {didShare ? (navigator.share ? "Shared!" : "Link Copied!") : "Share This Event"}
+          </button>
 
           {/* ── BOOK TICKETS ── */}
           {event.url && (
