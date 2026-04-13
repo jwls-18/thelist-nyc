@@ -1064,7 +1064,7 @@ function MapModal({ venues, events, onClose }) {
           <div style={{position:'relative',height:260,background:'#e8e0d4',overflow:'hidden'}}>
             <iframe
               title="NYC Arts Venues"
-              src={`https://www.google.com/maps/embed/v1/search?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU3Kho&q=performing+arts+venues+New+York+City&zoom=12`}
+              src={`https://www.google.com/maps/embed/v1/search?key=${import.meta.env.VITE_GOOGLE_MAPS_KEY}&q=performing+arts+venues+New+York+City&zoom=12`}
               style={{width:'100%',height:'100%',border:'none',filter:'sepia(20%) contrast(95%)'}}
               allowFullScreen
               loading="lazy"
