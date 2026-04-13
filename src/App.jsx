@@ -729,11 +729,13 @@ function Onboarding({ onJoin }) {
 
 // ── EVENT CARD ────────────────────────────────────────────────────────
 function EventCard({ event, username, onOpen }) {
-  const cat   = CAT_COLOR[event.category] || {bg:"#EEE",text:"#333"};
-  const going = event.going||[];
-  const inter = event.interested||[];
-  const iGo   = going.includes(username);
-  const iInt  = inter.includes(username);
+  const cat    = CAT_COLOR[event.category] || {bg:"#EEE",text:"#333"};
+  const going  = event.going||[];
+  const inter  = event.interested||[];
+  const noVibe = event.notMyVibe||[];
+  const iGo    = going.includes(username);
+  const iInt   = inter.includes(username);
+  const iNo    = noVibe.includes(username);
   const past  = isPast(event.date);
   const [imgErr, setImgErr] = useState(false);
   const hasImg = event.image && !imgErr;
@@ -844,6 +846,7 @@ function EventCard({ event, username, onOpen }) {
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             {iGo && <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"var(--sage)",letterSpacing:"0.08em"}}>GOING</span>}
             {iInt&&!iGo && <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"var(--slate)",letterSpacing:"0.08em"}}>INTERESTED</span>}
+            {iNo&&!iGo&&!iInt && <span style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"var(--rust)",letterSpacing:"0.08em"}}>NOT MY VIBE</span>}
             <button onClick={handleShare} title={didShare ? "Copied!" : "Share"} style={{
               background:"none",border:"none",cursor:"pointer",padding:2,
               color:didShare ? "var(--sage)" : "var(--muted)",
@@ -860,11 +863,13 @@ function EventCard({ event, username, onOpen }) {
 
 // ── EVENT MODAL ───────────────────────────────────────────────────────
 function EventModal({ event, username, onClose, onRsvp }) {
-  const cat   = CAT_COLOR[event.category]||{bg:"#EEE",text:"#333"};
-  const going = event.going||[];
-  const inter = event.interested||[];
-  const iGo   = going.includes(username);
-  const iInt  = inter.includes(username);
+  const cat    = CAT_COLOR[event.category]||{bg:"#EEE",text:"#333"};
+  const going  = event.going||[];
+  const inter  = event.interested||[];
+  const noVibe = event.notMyVibe||[];
+  const iGo    = going.includes(username);
+  const iInt   = inter.includes(username);
+  const iNo    = noVibe.includes(username);
   const [didShare, setDidShare] = useState(false);
   const handleShare = async () => {
     const ok = await shareEvent(event);
@@ -963,7 +968,13 @@ function EventModal({ event, username, onClose, onRsvp }) {
                   <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"var(--ink)"}}>{inter.join(", ")}</span>
                 </div>
               )}
-              {going.length===0&&inter.length===0&&(
+              {noVibe.length>0&&(
+                <div style={{display:"flex",gap:8,alignItems:"baseline"}}>
+                  <span style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:"var(--rust)",minWidth:70}}>NO-NO</span>
+                  <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"var(--ink)"}}>{noVibe.join(", ")}</span>
+                </div>
+              )}
+              {going.length===0&&inter.length===0&&noVibe.length===0&&(
                 <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"#bbb"}}>No one yet</span>
               )}
             </div>
@@ -991,7 +1002,7 @@ function EventModal({ event, username, onClose, onRsvp }) {
                   textTransform:"uppercase",cursor:"pointer",transition:"all .2s",
                   display:"flex",alignItems:"center",justifyContent:"center",gap:6,
                 }}><Icon name="circle" size={13} color={iInt&&!iGo?"#fff":"var(--line)"}/> Interested</button>
-                {(iGo||iInt)&&(
+                {(iGo||iInt||iNo)&&(
                   <button onClick={()=>onRsvp(event.id,"none")} style={{
                     minHeight:48,width:48,background:"transparent",
                     border:"1.5px solid var(--line)",color:"var(--muted)",
@@ -999,6 +1010,18 @@ function EventModal({ event, username, onClose, onRsvp }) {
                   }}><Icon name="x" size={16}/></button>
                 )}
               </div>
+              <button onClick={()=>onRsvp(event.id, iNo ? "none" : "not_my_vibe")} style={{
+                width:"100%",minHeight:44,padding:"0 12px",
+                background:iNo?"var(--rust)":"transparent",
+                border:`1.5px solid ${iNo?"var(--rust)":"var(--line)"}`,
+                color:iNo?"#fff":"var(--muted)",
+                fontFamily:"'DM Mono',monospace",fontSize:11,letterSpacing:"0.1em",
+                textTransform:"uppercase",cursor:"pointer",transition:"all .2s",
+                display:"flex",alignItems:"center",justifyContent:"center",gap:6,
+              }}>
+                <Icon name="x" size={13} color={iNo?"#fff":"var(--muted)"}/>
+                {iNo ? "Removed from No-Nos" : "Not My Vibe"}
+              </button>
             </div>
           )}
 
@@ -1838,34 +1861,39 @@ export default function TheList() {
     }
     setEvents(prev => prev.map(ev => {
       if (ev.id !== id) return ev;
-      let going      = [...(ev.going||[])];
-      let interested = [...(ev.interested||[])];
-      // remove from both first
+      let going       = [...(ev.going||[])];
+      let interested  = [...(ev.interested||[])];
+      let notMyVibe   = [...(ev.notMyVibe||[])];
       going      = going.filter(n=>n!==username);
       interested = interested.filter(n=>n!==username);
-      if (status==="going")      going.push(username);
-      if (status==="interested") interested.push(username);
-      return {...ev,going,interested};
+      notMyVibe  = notMyVibe.filter(n=>n!==username);
+      if (status==="going")        going.push(username);
+      if (status==="interested")   interested.push(username);
+      if (status==="not_my_vibe")  notMyVibe.push(username);
+      return {...ev,going,interested,notMyVibe};
     }));
-    // Update selected if open
     setSelected(prev => {
       if (!prev||prev.id!==id) return prev;
       let going      = [...(prev.going||[])];
       let interested = [...(prev.interested||[])];
+      let notMyVibe  = [...(prev.notMyVibe||[])];
       going      = going.filter(n=>n!==username);
       interested = interested.filter(n=>n!==username);
-      if (status==="going")      going.push(username);
-      if (status==="interested") interested.push(username);
-      return {...prev,going,interested};
+      notMyVibe  = notMyVibe.filter(n=>n!==username);
+      if (status==="going")       going.push(username);
+      if (status==="interested")  interested.push(username);
+      if (status==="not_my_vibe") notMyVibe.push(username);
+      return {...prev,going,interested,notMyVibe};
     });
   };
 
   const visible = events
     .filter(e => {
-      if (view==="upcoming" && isPast(e.date)) return false;
-      if (view==="past"        && !isPast(e.date)) return false;
-      if (view==="going"       && !(e.going||[]).includes(username)) return false;
-      if (view==="interested"  && !(e.interested||[]).includes(username)) return false;
+      if (view==="upcoming"     && isPast(e.date)) return false;
+      if (view==="past"         && !isPast(e.date)) return false;
+      if (view==="going"        && !(e.going||[]).includes(username)) return false;
+      if (view==="interested"   && !(e.interested||[]).includes(username)) return false;
+      if (view==="not_my_vibe"  && !(e.notMyVibe||[]).includes(username)) return false;
       if (cat!=="All"          && e.category!==cat) return false;
       if (venueFilter!=="All"  && e.venue!==venueFilter) return false;
       return true;
@@ -1890,6 +1918,7 @@ export default function TheList() {
 
   const myCount         = events.filter(e=>(e.going||[]).includes(username)).length;
   const interestedCount = events.filter(e=>(e.interested||[]).includes(username)).length;
+  const noNoCount       = events.filter(e=>(e.notMyVibe||[]).includes(username)).length;
 
   return (
     <div style={{minHeight:"100vh",background:"var(--cream)"}}>
@@ -1972,10 +2001,11 @@ export default function TheList() {
           WebkitOverflowScrolling:"touch",
         }}>
           {[
-            {key:"upcoming",   label:"Upcoming"},
-            {key:"going",      label:`Going (${myCount})`},
-            {key:"interested", label:`Interested (${interestedCount})`},
-            {key:"past",       label:"Past"},
+            {key:"upcoming",    label:"Upcoming"},
+            {key:"going",       label:`Going (${myCount})`},
+            {key:"interested",  label:`Interested (${interestedCount})`},
+            {key:"not_my_vibe", label:`No-Nos${noNoCount>0?` (${noNoCount})`:""}`},
+            {key:"past",        label:"Past"},
           ].map(({key,label})=>(
             <button key={key} onClick={()=>setView(key)} style={{
               padding:"12px 14px",minHeight:44,
@@ -2054,9 +2084,10 @@ export default function TheList() {
           <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,fontStyle:"italic"}}>
             {venueFilter !== "All"
               ? venueFilter
-              : view==="upcoming"   ? "What's On"
-              : view==="going"      ? "You're Going"
-              : view==="interested" ? "You're Interested"
+              : view==="upcoming"    ? "What's On"
+              : view==="going"       ? "You're Going"
+              : view==="interested"  ? "You're Interested"
+              : view==="not_my_vibe" ? "No-Nos"
               : "Archive"}
           </h2>
           <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"var(--muted)"}}>
@@ -2074,6 +2105,8 @@ export default function TheList() {
               ? "You haven't marked anything going yet."
               : view==="interested"
               ? "Nothing marked as interested yet."
+              : view==="not_my_vibe"
+              ? "No no-nos yet. Lucky you."
               : "Nothing here yet."}
           </div>
         ) : (
