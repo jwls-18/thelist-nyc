@@ -234,6 +234,8 @@ const VENUES = [
   "Pioneer Works",
   "National Sawdust",
   "Carnegie Hall",
+  "L'Alliance New York",
+  "Amant",
   "Other",
 ];
 
@@ -564,6 +566,34 @@ const SEED_EVENTS = [
     date:"2026-06-11", time:"7:30 PM", price:"$25–$65",
     blurb:"A vibrant tribute to the rickshaw drivers of South Africa past — celebrating resilience, artistry, and strength. Inspired by Orlin childhood memories of Zulu men pulling elaborately decorated rickshaws under apartheid. Performed by Johannesburg renowned Moving into Dance Mophatong.",
     url:"https://nyuskirball.org", addedBy:"system", going:[], interested:[],
+  },
+
+  // ── L'ALLIANCE NEW YORK ───────────────────────────────────────────────
+  {
+    id:"la1", title:"Carte Blanche: French & Francophone Performance", venue:"L'Alliance New York", category:"Performance Art",
+    date:"2026-05-08", time:"7:00 PM", price:"Free–$25",
+    blurb:"L'Alliance New York presents an evening of contemporary French and Francophone performance — dance, theater, and live art from emerging and established artists crossing the Atlantic. One of Manhattan's most distinctive cultural embassies.",
+    url:"https://www.fiaf.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"la2", title:"Cinéma Français: Spring Showcase", venue:"L'Alliance New York", category:"Film",
+    date:"2026-05-22", time:"7:30 PM", price:"$15",
+    blurb:"A curated selection of new French cinema — features and shorts — followed by a conversation with filmmakers. Subtitled in English. L'Alliance's beloved film program in the heart of Manhattan.",
+    url:"https://www.fiaf.org", addedBy:"system", going:[], interested:[],
+  },
+
+  // ── AMANT ─────────────────────────────────────────────────────────────
+  {
+    id:"am1", title:"Amant Spring Exhibitions Opening", venue:"Amant", category:"Visual Art",
+    date:"2026-04-18", time:"6:00 PM", price:"Free",
+    blurb:"Opening reception for Amant's spring exhibition season. This Brooklyn arts foundation champions experimental and interdisciplinary work in a stunning campus of galleries, residencies, and green space — one of NYC's most quietly essential art spaces.",
+    url:"https://www.amant.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"am2", title:"Amant: Artist Residency Open Studios", venue:"Amant", category:"Visual Art",
+    date:"2026-06-05", time:"5:00 PM", price:"Free",
+    blurb:"Amant's resident artists open their studios to the public. A rare chance to see work-in-progress, meet artists from across the globe, and experience Bushwick's most adventurous arts campus.",
+    url:"https://www.amant.org", addedBy:"system", going:[], interested:[],
   },
 ];
 
