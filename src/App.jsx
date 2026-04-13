@@ -570,30 +570,60 @@ const SEED_EVENTS = [
 
   // ── L'ALLIANCE NEW YORK ───────────────────────────────────────────────
   {
-    id:"la1", title:"Carte Blanche: French & Francophone Performance", venue:"L'Alliance New York", category:"Performance Art",
-    date:"2026-05-08", time:"7:00 PM", price:"Free–$25",
-    blurb:"L'Alliance New York presents an evening of contemporary French and Francophone performance — dance, theater, and live art from emerging and established artists crossing the Atlantic. One of Manhattan's most distinctive cultural embassies.",
-    url:"https://www.fiaf.org", addedBy:"system", going:[], interested:[],
+    id:"la1", title:"Comic Arts Fest 2026", venue:"L'Alliance New York", category:"Visual Art",
+    date:"2026-04-24", time:"Various", price:"Check site",
+    blurb:"A weekend celebration of the art of comics — renowned artists, talks, panels, and workshops. One of the most distinctive cultural events of the spring season in Manhattan.",
+    url:"https://lallianceny.org/event/comic-arts-fest-2026/", addedBy:"system", going:[], interested:[],
   },
   {
-    id:"la2", title:"Cinéma Français: Spring Showcase", venue:"L'Alliance New York", category:"Film",
-    date:"2026-05-22", time:"7:30 PM", price:"$15",
-    blurb:"A curated selection of new French cinema — features and shorts — followed by a conversation with filmmakers. Subtitled in English. L'Alliance's beloved film program in the heart of Manhattan.",
-    url:"https://www.fiaf.org", addedBy:"system", going:[], interested:[],
+    id:"la2", title:"The Films of Sophie Letourneur", venue:"L'Alliance New York", category:"Film",
+    date:"2026-04-21", time:"4:00 & 7:00 PM", price:"Check site",
+    blurb:"Retrospective of French filmmaker Sophie Letourneur's humanistic, intimate cinema. Running through May 26 — including the US Premiere of her new Italian family film L'Aventura.",
+    url:"https://lallianceny.org/event/the-films-of-sophie-letourneur/", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"la3", title:"L'Aventura — US Premiere", venue:"L'Alliance New York", category:"Film",
+    date:"2026-04-21", time:"4:00 & 7:00 PM", price:"Check site",
+    blurb:"Sophie Letourneur's new Italian family film gets its US Premiere at L'Alliance. A warm, witty portrait of a family vacation unraveling in unexpected ways. Not to miss.",
+    url:"https://lallianceny.org/event/laventura/", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"la4", title:"L'Art du Vin: Wine Masterclass with iDealwine", venue:"L'Alliance New York", category:"Other",
+    date:"2026-04-16", time:"6:30 PM", price:"Check site",
+    blurb:"An evening exploring French wine regions through guided tasting with iDealwine. Next session June 10. A convivial, expert-led deep dive into the wines of France in Midtown Manhattan.",
+    url:"https://lallianceny.org/event/wine-masterclass-series/", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"la5", title:"In Celebration of Ken and Flo Jacobs", venue:"L'Alliance New York", category:"Film",
+    date:"2026-04-16", time:"7:00 PM", price:"Check site",
+    blurb:"A tribute evening honoring beloved avant-garde filmmakers Ken and Flo Jacobs. A rare and moving celebration of two artists who shaped experimental cinema in New York.",
+    url:"https://lallianceny.org/event/in-celebration-of-ken-and-flo-jacobs/", addedBy:"system", going:[], interested:[],
   },
 
   // ── AMANT ─────────────────────────────────────────────────────────────
   {
-    id:"am1", title:"Amant Spring Exhibitions Opening", venue:"Amant", category:"Visual Art",
-    date:"2026-04-18", time:"6:00 PM", price:"Free",
-    blurb:"Opening reception for Amant's spring exhibition season. This Brooklyn arts foundation champions experimental and interdisciplinary work in a stunning campus of galleries, residencies, and green space — one of NYC's most quietly essential art spaces.",
-    url:"https://www.amant.org", addedBy:"system", going:[], interested:[],
+    id:"am1", title:"Letters to Omer — Selma Selman & Maša", venue:"Amant", category:"Performance Art",
+    date:"2026-04-15", time:"7:00 PM", price:"Check site",
+    blurb:"Part of Amant's For Your Reference series. An intimate performance by Selma Selman and Maša — two artists whose work engages memory, identity, and resistance. At one of Bushwick's most vital arts spaces.",
+    url:"https://www.amant.org/programs/2208-letters-to-omer-with-selma-selman-and-masa", addedBy:"system", going:[], interested:[],
   },
   {
-    id:"am2", title:"Amant: Artist Residency Open Studios", venue:"Amant", category:"Visual Art",
-    date:"2026-06-05", time:"5:00 PM", price:"Free",
-    blurb:"Amant's resident artists open their studios to the public. A rare chance to see work-in-progress, meet artists from across the globe, and experience Bushwick's most adventurous arts campus.",
-    url:"https://www.amant.org", addedBy:"system", going:[], interested:[],
+    id:"am2", title:"MUSKISM: A Guide for the Perplexed — Book Launch", venue:"Amant", category:"Other",
+    date:"2026-04-24", time:"7:00 PM", price:"Free",
+    blurb:"Book launch event at Amant for MUSKISM: A Guide for the Perplexed. An evening of conversation around a new publication interrogating power, tech, and culture.",
+    url:"https://www.amant.org/programs/2142-muskism-a-guide-for-the-perplexed", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"am3", title:"Folded Group — curated by Bill Nace & Kim Gordon", venue:"Amant", category:"Visual Art",
+    date:"2026-03-19", time:"Open during gallery hours", price:"Free",
+    blurb:"A group exhibition curated by Bill Nace and Kim Gordon, on view through May 17. Kim Gordon's curatorial eye meets Amant's experimental ethos — essential viewing this spring.",
+    url:"https://www.amant.org/exhibitions/297-folded-group-curated-by-bill-nace-and-kim-gordon", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"am4", title:"Kim Gordon: Count Your Chickens", venue:"Amant", category:"Visual Art",
+    date:"2026-03-19", time:"Open during gallery hours", price:"Free",
+    blurb:"A solo exhibition by Kim Gordon — musician, artist, cultural icon — on view through August 16. Raw, confrontational, and essential. Don't sleep on this one.",
+    url:"https://www.amant.org/exhibitions/295-kim-gordon-count-your-chickens", addedBy:"system", going:[], interested:[],
   },
 ];
 
