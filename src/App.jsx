@@ -628,12 +628,12 @@ const SEED_EVENTS = [
 ];
 
 // ── STORAGE ───────────────────────────────────────────────────────────
-async function sGet(key, shared=true) {
-  try { const r = await window.storage.get(key,shared); return r?JSON.parse(r.value):null; }
+async function sGet(key) {
+  try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; }
   catch { return null; }
 }
-async function sSet(key,val,shared=true) {
-  try { await window.storage.set(key,JSON.stringify(val),shared); } catch {}
+async function sSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────
@@ -1687,7 +1687,7 @@ export default function TheList() {
   // Load username
   useEffect(() => {
     (async () => {
-      const saved = await sGet("tl-username", false);
+      const saved = await sGet("tl-username");
       if (saved) setUsername(saved);
     })();
   }, []);
@@ -1735,7 +1735,7 @@ export default function TheList() {
 
   const handleJoin = async (name) => {
     setUsername(name);
-    await sSet("tl-username", name, false);
+    await sSet("tl-username", name);
   };
 
   const addEvent = async (ev) => {
