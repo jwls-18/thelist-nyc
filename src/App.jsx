@@ -1797,24 +1797,31 @@ export default function TheList() {
   };
 
   const requestNotifications = async () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+    // iOS Safari only supports notifications when installed as a PWA
+    if (isIOS && !isStandalone) {
+      alert('To enable notifications on iPhone:\n\n1. Tap the Share button (box with arrow) in Safari\n2. Tap "Add to Home Screen"\n3. Open The List from your home screen\n4. Tap the bell again to enable notifications');
+      return;
+    }
+
     if (typeof Notification === 'undefined') {
-      alert('Push notifications are not supported in this browser.');
+      alert('Notifications aren\'t supported in this browser. Try opening The List in Safari or Chrome.');
       return;
     }
     if (Notification.permission === 'granted') {
-      // Already granted — show a test notification
       new Notification('The List', { body: 'Notifications are already on!' });
       return;
     }
     if (Notification.permission === 'denied') {
-      alert('Notifications are blocked. Please enable them in your browser settings, then try again.');
+      alert('Notifications are blocked. Go to your browser Settings → Site Settings → Notifications and allow The List, then try again.');
       return;
     }
-    // Request permission (must be from user gesture — this button click qualifies)
     const perm = await Notification.requestPermission();
     setNotifPerm(perm);
     if (perm === 'granted') {
-      new Notification('The List', { body: 'You will be notified when friends RSVP!' });
+      new Notification('The List', { body: 'You\'ll be notified when friends RSVP! 🎭' });
     }
   };
 
