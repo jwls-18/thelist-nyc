@@ -1859,42 +1859,45 @@ export default function TheList() {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 
-    // iOS Safari only supports notifications when installed as a PWA
     if (isIOS && !isStandalone) {
-      alert('To enable notifications on iPhone:\n\n1. Tap the Share button (box with arrow) in Safari\n2. Tap "Add to Home Screen"\n3. Open The List from your home screen\n4. Tap the bell again to enable notifications');
+      alert('To enable notifications on iPhone:\n\n1. Tap the Share button (box with arrow) in Safari\n2. Tap "Add to Home Screen"\n3. Open The List from your home screen\n4. Tap the bell again');
       return;
     }
-
-    if (typeof Notification === 'undefined') {
-      alert('Notifications aren\'t supported in this browser. Try opening The List in Safari or Chrome.');
-      return;
-    }
-    if (Notification.permission === 'granted') {
-      new Notification('The List', { body: 'Notifications are already on!' });
+    if (typeof Notification === 'undefined' || !('serviceWorker' in navigator)) {
+      alert('Notifications aren\'t supported in this browser. Try Chrome or Safari.');
       return;
     }
     if (Notification.permission === 'denied') {
-      alert('Notifications are blocked. Go to your browser Settings → Site Settings → Notifications and allow The List, then try again.');
+      alert('Notifications are blocked. Go to browser Settings → Site Settings → Notifications and allow The List.');
       return;
     }
+
     const perm = await Notification.requestPermission();
     setNotifPerm(perm);
-    if (perm === 'granted') {
-      new Notification('The List', { body: 'You\'ll be notified when friends RSVP! 🎭' });
-    }
-  };
+    if (perm !== 'granted') return;
 
-  const sendNotification = (title, body) => {
-    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-    try { new Notification(title, { body }); } catch {}
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      const existing = await reg.pushManager.getSubscription();
+      const sub = existing || await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+      });
+      // Save subscription + username to Supabase
+      await supabase.from('push_subscriptions').upsert({
+        username,
+        subscription: sub.toJSON(),
+        updated_at: new Date().toISOString(),
+      });
+      alert('🎭 You\'ll get a notification when a friend RSVPs!');
+    } catch (e) {
+      console.error('Push subscription failed:', e);
+      alert('Could not enable push notifications: ' + e.message);
+    }
   };
 
   const rsvp = (id, status) => {
-    // Notify crew when someone marks going
-    if (status === 'going') {
-      const ev = events.find(e => e.id === id);
-      if (ev) sendNotification(username + ' is going!', ev.title + ' · ' + ev.venue);
-    }
     let updatedEvent = null;
     setEvents(prev => prev.map(ev => {
       if (ev.id !== id) return ev;
@@ -1923,8 +1926,22 @@ export default function TheList() {
       if (status==="not_my_vibe") notMyVibe.push(username);
       return {...prev,going,interested,notMyVibe};
     });
-    // Persist to Supabase so friends see it instantly
-    setTimeout(() => { if (updatedEvent) dbUpsert(updatedEvent); }, 0);
+    // Persist to Supabase + push notify friends
+    setTimeout(async () => {
+      if (!updatedEvent) return;
+      await dbUpsert(updatedEvent);
+      if (status === 'none') return;
+      const label = status === 'going' ? 'is going' : status === 'interested' ? 'is interested' : 'marked a no-no';
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${username} ${label}`,
+          body: updatedEvent.title + ' · ' + updatedEvent.venue,
+          excludeUsername: username,
+        }),
+      }).catch(() => {});
+    }, 0);
   };
 
   const visible = events
