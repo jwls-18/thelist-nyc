@@ -9,18 +9,21 @@ const supabase = createClient(
 
 async function dbLoad() {
   const { data, error } = await supabase.from("events").select("id, data");
-  if (error || !data) return null;
+  if (error) { console.error("dbLoad error:", error.message, error.details); return null; }
+  if (!data?.length) return null;
   return data.map(r => ({ id: r.id, ...r.data }));
 }
 
 async function dbUpsert(event) {
   const { id, ...data } = event;
-  await supabase.from("events").upsert({ id, data, updated_at: new Date().toISOString() });
+  const { error } = await supabase.from("events").upsert({ id, data, updated_at: new Date().toISOString() });
+  if (error) console.error("dbUpsert error:", error.message, error.details);
 }
 
 async function dbUpsertMany(events) {
   const rows = events.map(({ id, ...data }) => ({ id, data, updated_at: new Date().toISOString() }));
-  await supabase.from("events").upsert(rows);
+  const { error } = await supabase.from("events").upsert(rows);
+  if (error) console.error("dbUpsertMany error:", error.message, error.details);
 }
 
 // ── DESIGN SYSTEM ─────────────────────────────────────────────────────
