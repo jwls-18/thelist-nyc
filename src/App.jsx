@@ -1183,6 +1183,130 @@ function CommentsSection({ event, username }) {
   );
 }
 
+// ── CALENDAR VIEW ─────────────────────────────────────────────────────
+function CalendarView({ events, username, onOpen }) {
+  const today = new Date();
+  const [month, setMonth] = useState(today.getMonth());
+  const [year,  setYear]  = useState(today.getFullYear());
+  const [daySelected, setDaySelected] = useState(null);
+
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = Array(firstDay).fill(null).concat(
+    Array.from({length: daysInMonth}, (_, i) => i + 1)
+  );
+  // Pad to complete last row
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  // Map events by date string
+  const byDate = {};
+  events.forEach(e => {
+    if (!e.date) return;
+    const d = new Date(e.date + 'T12:00:00');
+    if (d.getMonth() === month && d.getFullYear() === year) {
+      const day = d.getDate();
+      if (!byDate[day]) byDate[day] = [];
+      byDate[day].push(e);
+    }
+  });
+
+  const isToday = (d) => d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  const isPastDay = (d) => new Date(year, month, d) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const prevMonth = () => { if (month === 0) { setMonth(11); setYear(y => y-1); } else setMonth(m => m-1); setDaySelected(null); };
+  const nextMonth = () => { if (month === 11) { setMonth(0); setYear(y => y+1); } else setMonth(m => m+1); setDaySelected(null); };
+
+  const selectedEvents = daySelected ? (byDate[daySelected] || []) : [];
+
+  return (
+    <div style={{paddingBottom:40}}>
+      {/* Month navigation */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+        <button onClick={prevMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 12px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:11}}>‹</button>
+        <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700,fontStyle:"italic"}}>
+          {MONTHS[month]} {year}
+        </h2>
+        <button onClick={nextMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 12px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:11}}>›</button>
+      </div>
+
+      {/* Day labels */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4}}>
+        {DAYS.map(d => (
+          <div key={d} style={{textAlign:"center",fontFamily:"'DM Mono',monospace",fontSize:9,letterSpacing:"0.1em",color:"var(--muted)",padding:"4px 0",textTransform:"uppercase"}}>{d}</div>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}}>
+        {cells.map((day, i) => {
+          if (!day) return <div key={`e${i}`}/>;
+          const evs = byDate[day] || [];
+          const selected = daySelected === day;
+          const past = isPastDay(day);
+          return (
+            <div key={day} onClick={() => setDaySelected(selected ? null : day)} style={{
+              minHeight:64,padding:"6px 5px 4px",
+              background: selected ? "var(--ink)" : isToday(day) ? "var(--gold)" : "var(--surface)",
+              border:`1px solid ${selected ? "var(--ink)" : isToday(day) ? "var(--gold)" : "var(--line)"}`,
+              cursor: evs.length ? "pointer" : "default",
+              opacity: past && !evs.length ? 0.35 : 1,
+              transition:"all .15s",
+              position:"relative",
+            }}>
+              <div style={{
+                fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,
+                color: selected ? "var(--cream)" : isToday(day) ? "#fff" : "var(--ink)",
+                marginBottom:4,
+              }}>{day}</div>
+              {/* Event dots / chips */}
+              <div style={{display:"flex",flexDirection:"column",gap:2}}>
+                {evs.slice(0,3).map(e => {
+                  const cat = CAT_COLOR[e.category] || {text:"#888"};
+                  return (
+                    <div key={e.id} style={{
+                      fontSize:8,lineHeight:1.2,
+                      fontFamily:"'DM Sans',sans-serif",
+                      color: selected ? "var(--cream)" : cat.text,
+                      overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+                      borderLeft:`2px solid ${cat.text}`,paddingLeft:3,
+                      opacity: selected ? 0.9 : 1,
+                    }}>{e.title}</div>
+                  );
+                })}
+                {evs.length > 3 && (
+                  <div style={{fontSize:8,fontFamily:"'DM Mono',monospace",color: selected?"var(--cream)":"var(--muted)"}}>+{evs.length-3} more</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Day detail panel */}
+      {daySelected && (
+        <div className="fade-in" style={{marginTop:20,borderTop:"2px solid var(--ink)",paddingTop:20}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,fontStyle:"italic",marginBottom:14,color:"var(--ink)"}}>
+            {MONTHS[month]} {daySelected}
+          </div>
+          {selectedEvents.length === 0 ? (
+            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"var(--muted)",fontStyle:"italic"}}>Nothing on this day.</div>
+          ) : (
+            <div style={{display:"flex",flexDirection:"column",gap:1}}>
+              {selectedEvents.map(e => (
+                <EventCard key={e.id} event={e} username={username} onOpen={onOpen}/>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── MAP MODAL ─────────────────────────────────────────────────────────
 function MapModal({ venues, events, onClose }) {
   const [active, setActive] = useState(null);
@@ -2071,6 +2195,7 @@ export default function TheList() {
         }}>
           {[
             {key:"upcoming",    label:"Upcoming"},
+            {key:"calendar",    label:"Calendar"},
             {key:"going",       label:`Going (${myCount})`},
             {key:"interested",  label:`Interested (${interestedCount})`},
             {key:"not_my_vibe", label:`No-Nos${noNoCount>0?` (${noNoCount})`:""}`},
@@ -2148,44 +2273,50 @@ export default function TheList() {
       {/* ── MAIN ── */}
       <main style={{maxWidth:900,margin:"0 auto",padding:"32px 24px 80px"}}>
 
-        {/* Section header */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:24}}>
-          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,fontStyle:"italic"}}>
-            {venueFilter !== "All"
-              ? venueFilter
-              : view==="upcoming"    ? "What's On"
-              : view==="going"       ? "You're Going"
-              : view==="interested"  ? "You're Interested"
-              : view==="not_my_vibe" ? "No-Nos"
-              : "Archive"}
-          </h2>
-          <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"var(--muted)"}}>
-            {visible.length} {visible.length===1?"event":"events"}
-          </span>
-        </div>
-
-        {visible.length===0 ? (
-          <div style={{
-            textAlign:"center",padding:"80px 0",
-            fontFamily:"'Playfair Display',serif",fontSize:18,
-            fontStyle:"italic",color:"var(--muted)",
-          }}>
-            {view==="going"
-              ? "You haven't marked anything going yet."
-              : view==="interested"
-              ? "Nothing marked as interested yet."
-              : view==="not_my_vibe"
-              ? "No no-nos yet. Lucky you."
-              : "Nothing here yet."}
-          </div>
+        {view === "calendar" ? (
+          <CalendarView events={events} username={username} onOpen={setSelected}/>
         ) : (
-          <div style={{display:"flex",flexDirection:"column",gap:1}}>
-            {visible.map((e,i)=>(
-              <div key={e.id} className="fade-in" style={{animationDelay:`${i*0.04}s`}}>
-                <EventCard event={e} username={username} onOpen={setSelected}/>
+          <>
+            {/* Section header */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:24}}>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,fontWeight:700,fontStyle:"italic"}}>
+                {venueFilter !== "All"
+                  ? venueFilter
+                  : view==="upcoming"    ? "What's On"
+                  : view==="going"       ? "You're Going"
+                  : view==="interested"  ? "You're Interested"
+                  : view==="not_my_vibe" ? "No-Nos"
+                  : "Archive"}
+              </h2>
+              <span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"var(--muted)"}}>
+                {visible.length} {visible.length===1?"event":"events"}
+              </span>
+            </div>
+
+            {visible.length===0 ? (
+              <div style={{
+                textAlign:"center",padding:"80px 0",
+                fontFamily:"'Playfair Display',serif",fontSize:18,
+                fontStyle:"italic",color:"var(--muted)",
+              }}>
+                {view==="going"
+                  ? "You haven't marked anything going yet."
+                  : view==="interested"
+                  ? "Nothing marked as interested yet."
+                  : view==="not_my_vibe"
+                  ? "No no-nos yet. Lucky you."
+                  : "Nothing here yet."}
               </div>
-            ))}
-          </div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:1}}>
+                {visible.map((e,i)=>(
+                  <div key={e.id} className="fade-in" style={{animationDelay:`${i*0.04}s`}}>
+                    <EventCard event={e} username={username} onOpen={setSelected}/>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
 
