@@ -1223,25 +1223,26 @@ function CalendarView({ events, username, onOpen }) {
   const selectedEvents = daySelected ? (byDate[daySelected] || []) : [];
 
   return (
-    <div style={{paddingBottom:40}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 180px)",minHeight:500}}>
+
       {/* Month navigation */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-        <button onClick={prevMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 12px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:11}}>‹</button>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexShrink:0}}>
+        <button onClick={prevMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 14px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:13}}>‹</button>
         <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700,fontStyle:"italic"}}>
           {MONTHS[month]} {year}
         </h2>
-        <button onClick={nextMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 12px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:11}}>›</button>
+        <button onClick={nextMonth} style={{background:"none",border:"1px solid var(--line)",padding:"6px 14px",cursor:"pointer",color:"var(--ink)",fontFamily:"'DM Mono',monospace",fontSize:13}}>›</button>
       </div>
 
       {/* Day labels */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",marginBottom:4,flexShrink:0}}>
         {DAYS.map(d => (
           <div key={d} style={{textAlign:"center",fontFamily:"'DM Mono',monospace",fontSize:9,letterSpacing:"0.1em",color:"var(--muted)",padding:"4px 0",textTransform:"uppercase"}}>{d}</div>
         ))}
       </div>
 
-      {/* Grid */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}}>
+      {/* Grid — fixed, never moves */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2,flexShrink:0}}>
         {cells.map((day, i) => {
           if (!day) return <div key={`e${i}`}/>;
           const evs = byDate[day] || [];
@@ -1255,14 +1256,12 @@ function CalendarView({ events, username, onOpen }) {
               cursor: evs.length ? "pointer" : "default",
               opacity: past && !evs.length ? 0.35 : 1,
               transition:"all .15s",
-              position:"relative",
             }}>
               <div style={{
                 fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:500,
                 color: selected ? "var(--cream)" : isToday(day) ? "#fff" : "var(--ink)",
                 marginBottom:4,
               }}>{day}</div>
-              {/* Event dots / chips */}
               <div style={{display:"flex",flexDirection:"column",gap:2}}>
                 {evs.slice(0,3).map(e => {
                   const cat = CAT_COLOR[e.category] || {text:"#888"};
@@ -1270,15 +1269,14 @@ function CalendarView({ events, username, onOpen }) {
                     <div key={e.id} style={{
                       fontSize:8,lineHeight:1.2,
                       fontFamily:"'DM Sans',sans-serif",
-                      color: selected ? "var(--cream)" : cat.text,
+                      color: selected ? "rgba(255,255,255,0.85)" : cat.text,
                       overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
-                      borderLeft:`2px solid ${cat.text}`,paddingLeft:3,
-                      opacity: selected ? 0.9 : 1,
+                      borderLeft:`2px solid ${selected ? "rgba(255,255,255,0.5)" : cat.text}`,paddingLeft:3,
                     }}>{e.title}</div>
                   );
                 })}
                 {evs.length > 3 && (
-                  <div style={{fontSize:8,fontFamily:"'DM Mono',monospace",color: selected?"var(--cream)":"var(--muted)"}}>+{evs.length-3} more</div>
+                  <div style={{fontSize:8,fontFamily:"'DM Mono',monospace",color:selected?"rgba(255,255,255,0.6)":"var(--muted)"}}>+{evs.length-3}</div>
                 )}
               </div>
             </div>
@@ -1286,23 +1284,41 @@ function CalendarView({ events, username, onOpen }) {
         })}
       </div>
 
-      {/* Day detail panel */}
-      {daySelected && (
-        <div className="fade-in" style={{marginTop:20,borderTop:"2px solid var(--ink)",paddingTop:20}}>
-          <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,fontStyle:"italic",marginBottom:14,color:"var(--ink)"}}>
-            {MONTHS[month]} {daySelected}
-          </div>
-          {selectedEvents.length === 0 ? (
-            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"var(--muted)",fontStyle:"italic"}}>Nothing on this day.</div>
-          ) : (
-            <div style={{display:"flex",flexDirection:"column",gap:1}}>
-              {selectedEvents.map(e => (
-                <EventCard key={e.id} event={e} username={username} onOpen={onOpen}/>
-              ))}
+      {/* Day detail panel — fixed height below grid, scrollable */}
+      <div style={{
+        flex:1,marginTop:12,borderTop:"2px solid var(--line)",
+        overflowY:"auto",WebkitOverflowScrolling:"touch",
+      }}>
+        {!daySelected ? (
+          <div style={{
+            display:"flex",alignItems:"center",justifyContent:"center",height:"100%",
+            fontFamily:"'Playfair Display',serif",fontSize:15,fontStyle:"italic",color:"var(--muted)",
+          }}>Tap a day to see events</div>
+        ) : (
+          <div style={{padding:"16px 0"}}>
+            <div style={{
+              fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,
+              fontStyle:"italic",marginBottom:12,color:"var(--ink)",
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+            }}>
+              <span>{MONTHS[month]} {daySelected}</span>
+              <button onClick={() => setDaySelected(null)} style={{
+                background:"none",border:"none",cursor:"pointer",
+                color:"var(--muted)",fontFamily:"'DM Mono',monospace",fontSize:10,
+              }}>✕ close</button>
             </div>
-          )}
-        </div>
-      )}
+            {selectedEvents.length === 0 ? (
+              <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:14,color:"var(--muted)",fontStyle:"italic"}}>Nothing on this day.</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:1}}>
+                {selectedEvents.map(e => (
+                  <EventCard key={e.id} event={e} username={username} onOpen={onOpen}/>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -2271,7 +2287,7 @@ export default function TheList() {
       </header>
 
       {/* ── MAIN ── */}
-      <main style={{maxWidth:900,margin:"0 auto",padding:"32px 24px 80px"}}>
+      <main style={{maxWidth:900,margin:"0 auto",padding: view==="calendar" ? "24px 24px 0" : "32px 24px 80px"}}>
 
         {view === "calendar" ? (
           <CalendarView events={events} username={username} onOpen={setSelected}/>
