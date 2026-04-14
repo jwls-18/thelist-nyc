@@ -1877,19 +1877,31 @@ export default function TheList() {
     if (perm !== 'granted') return;
 
     try {
+      // Convert VAPID public key from base64url to Uint8Array (required by browsers)
+      const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      const padding = '='.repeat((4 - vapidKey.length % 4) % 4);
+      const base64 = (vapidKey + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawKey = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
       const reg = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
+
+      // Unsubscribe any stale subscription first to avoid key mismatch errors
       const existing = await reg.pushManager.getSubscription();
-      const sub = existing || await reg.pushManager.subscribe({
+      if (existing) await existing.unsubscribe();
+
+      const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: import.meta.env.VITE_VAPID_PUBLIC_KEY,
+        applicationServerKey: rawKey,
       });
-      // Save subscription + username to Supabase
-      await supabase.from('push_subscriptions').upsert({
+
+      const { error } = await supabase.from('push_subscriptions').upsert({
         username,
         subscription: sub.toJSON(),
         updated_at: new Date().toISOString(),
       });
+      if (error) throw new Error('Supabase: ' + error.message);
+
       alert('🎭 You\'ll get a notification when a friend RSVPs!');
     } catch (e) {
       console.error('Push subscription failed:', e);
