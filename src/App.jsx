@@ -1,5 +1,27 @@
 /* eslint-disable */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+async function dbLoad() {
+  const { data, error } = await supabase.from("events").select("id, data");
+  if (error || !data) return null;
+  return data.map(r => ({ id: r.id, ...r.data }));
+}
+
+async function dbUpsert(event) {
+  const { id, ...data } = event;
+  await supabase.from("events").upsert({ id, data, updated_at: new Date().toISOString() });
+}
+
+async function dbUpsertMany(events) {
+  const rows = events.map(({ id, ...data }) => ({ id, data, updated_at: new Date().toISOString() }));
+  await supabase.from("events").upsert(rows);
+}
 
 // ── DESIGN SYSTEM ─────────────────────────────────────────────────────
 const CSS = `
@@ -627,7 +649,7 @@ const SEED_EVENTS = [
   },
 ];
 
-// ── STORAGE ───────────────────────────────────────────────────────────
+// ── STORAGE (username only — events live in Supabase) ─────────────────
 async function sGet(key) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null; }
   catch { return null; }
@@ -1101,10 +1123,7 @@ function CommentsSection({ event, username }) {
     const next = [...comments, c];
     setComments(next);
     setText('');
-    // Persist to shared storage
-    const all = await sGet('tl-events-v7') || [];
-    const updated = all.map(e => e.id === event.id ? {...e, comments: next} : e);
-    sSet('tl-events-v7', updated);
+    await dbUpsert({ ...event, comments: next });
   };
 
   const timeAgo = (iso) => {
@@ -1715,25 +1734,25 @@ export default function TheList() {
     })();
   }, []);
 
-  // Load events
+  // Load events from Supabase + real-time subscription
   useEffect(() => {
     if (!username) return;
     (async () => {
-      const saved = await sGet("tl-events-v7");
       let base;
-      if (saved && saved.length) {
-        // Merge: keep saved events, add any new seed events not yet in storage
-        const savedIds = new Set(saved.map(e => e.id));
-        const newSeeds = SEED_EVENTS.filter(e => !savedIds.has(e.id));
-        base = newSeeds.length ? [...saved, ...newSeeds] : saved;
+      const dbEvents = await dbLoad();
+      if (dbEvents && dbEvents.length) {
+        const dbIds = new Set(dbEvents.map(e => e.id));
+        const newSeeds = SEED_EVENTS.filter(e => !dbIds.has(e.id));
+        if (newSeeds.length) await dbUpsertMany(newSeeds);
+        base = newSeeds.length ? [...dbEvents, ...newSeeds] : dbEvents;
       } else {
+        await dbUpsertMany(SEED_EVENTS);
         base = SEED_EVENTS;
       }
       setEvents(base);
-      const savedVenues = await sGet("tl-venues-v1");
-      if (savedVenues && savedVenues.length) setCustomVenues(savedVenues);
       setLoaded(true);
-      // Fetch missing images in background — don't block UI
+
+      // Fetch missing images in background
       const needsImg = base.filter(e => !e.image);
       if (needsImg.length) {
         const updated = [...base];
@@ -1741,20 +1760,32 @@ export default function TheList() {
           const img = await fetchEventImage(m.title, m.venue);
           if (img) {
             const idx = updated.findIndex(x => x.id === m.id);
-            if (idx >= 0) updated[idx] = { ...updated[idx], image: img };
+            if (idx >= 0) {
+              updated[idx] = { ...updated[idx], image: img };
+              await dbUpsert(updated[idx]);
+            }
           }
         }));
         setEvents([...updated]);
-        sSet("tl-events-v7", updated);
       }
     })();
-  }, [username]);
 
-  // Persist events
-  useEffect(() => {
-    if (loaded) sSet("tl-events-v7", events);
-  }, [events, loaded]);
-  useEffect(() => { if (loaded) sSet("tl-venues-v1", customVenues); }, [customVenues, loaded]);
+    // Real-time: update state when any friend makes a change
+    const channel = supabase
+      .channel("events-live")
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "events" }, payload => {
+        const updated = { id: payload.new.id, ...payload.new.data };
+        setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
+        setSelected(prev => prev?.id === updated.id ? updated : prev);
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "events" }, payload => {
+        const inserted = { id: payload.new.id, ...payload.new.data };
+        setEvents(prev => prev.some(e => e.id === inserted.id) ? prev : [...prev, inserted]);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [username]);
 
   const handleJoin = async (name) => {
     setUsername(name);
@@ -1763,11 +1794,13 @@ export default function TheList() {
 
   const addEvent = async (ev) => {
     setEvents(prev => [ev, ...prev]);
-    // Fetch image in background for new events
+    await dbUpsert(ev);
     if (!ev.image) {
       const img = await fetchEventImage(ev.title, ev.venue);
       if (img) {
-        setEvents(prev => prev.map(e => e.id === ev.id ? {...e, image: img} : e));
+        const updated = {...ev, image: img};
+        setEvents(prev => prev.map(e => e.id === ev.id ? updated : e));
+        await dbUpsert(updated);
       }
     }
   };
@@ -1859,6 +1892,7 @@ export default function TheList() {
       const ev = events.find(e => e.id === id);
       if (ev) sendNotification(username + ' is going!', ev.title + ' · ' + ev.venue);
     }
+    let updatedEvent = null;
     setEvents(prev => prev.map(ev => {
       if (ev.id !== id) return ev;
       let going       = [...(ev.going||[])];
@@ -1870,7 +1904,8 @@ export default function TheList() {
       if (status==="going")        going.push(username);
       if (status==="interested")   interested.push(username);
       if (status==="not_my_vibe")  notMyVibe.push(username);
-      return {...ev,going,interested,notMyVibe};
+      updatedEvent = {...ev,going,interested,notMyVibe};
+      return updatedEvent;
     }));
     setSelected(prev => {
       if (!prev||prev.id!==id) return prev;
@@ -1885,6 +1920,8 @@ export default function TheList() {
       if (status==="not_my_vibe") notMyVibe.push(username);
       return {...prev,going,interested,notMyVibe};
     });
+    // Persist to Supabase so friends see it instantly
+    setTimeout(() => { if (updatedEvent) dbUpsert(updatedEvent); }, 0);
   };
 
   const visible = events
