@@ -268,9 +268,9 @@ const VENUES = [
 const SEED_EVENTS = [
   // ── JOYCE THEATER ──────────────────────────────────────────────────
   {
-    id:"j1", title:"Gibney Company", venue:"The Joyce Theater", category:"Dance",
-    date:"2026-04-12", time:"7:30 PM", price:"$10–$55",
-    blurb:"A dynamic program featuring a world premiere by Jawole Willa Jo Zollar, Lucinda Childs' luminous Canto Ostinato, and Medhi Walerski's evocative Silent Tides. One of NYC's most rigorous companies.",
+    id:"j1", title:"Johnny Loves Johann", venue:"The Joyce Theater", category:"Dance",
+    date:"2026-04-14", time:"7:30 PM", price:"$10–$55",
+    blurb:"A playful, witty program that puts pop and classical music in conversation — blending the works of Johnny Cash and Johann Sebastian Bach in an unexpected evening of dance. Running April 14–19.",
     url:"https://www.joyce.org/performances", addedBy:"system", going:[], interested:[],
   },
   {
@@ -293,8 +293,14 @@ const SEED_EVENTS = [
   },
   {
     id:"j5", title:"Tap City Festival", venue:"The Joyce Theater", category:"Dance",
-    date:"2026-06-15", time:"7:30 PM", price:"$10–$55",
-    blurb:"Master hoofers and rising talent for an exhilarating celebration of tap's legacy — classic revivals, world premieres, live music, and rare archival footage.",
+    date:"2026-05-19", time:"7:30 PM", price:"$10–$55",
+    blurb:"Master hoofers and rising talent for an exhilarating celebration of tap's legacy — classic revivals, world premieres, live music, and rare archival footage. Running May 19–24.",
+    url:"https://www.joyce.org/performances", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"j9", title:"Doug Varone and Dancers", venue:"The Joyce Theater", category:"Dance",
+    date:"2026-05-27", time:"7:30 PM", price:"$10–$55",
+    blurb:"Doug Varone brings his acclaimed company back to the Joyce for a program of bold, physically demanding works. Running May 27–31. One of American dance's most respected voices.",
     url:"https://www.joyce.org/performances", addedBy:"system", going:[], interested:[],
   },
   {
@@ -318,9 +324,9 @@ const SEED_EVENTS = [
 
   // ── BAM ──────────────────────────────────────────────────────────────
   {
-    id:"b1", title:"Natalia Lafourcade: Cancionera Tour", venue:"BAM (Brooklyn Academy of Music)", category:"Music",
-    date:"2026-04-10", time:"8:00 PM", price:"$45–$95",
-    blurb:"Mexican singer-songwriter Natalia Lafourcade gets back to basics — stripping down her beloved traditional Latin idioms for an intimate, acoustic evening at the Howard Gilman Opera House.",
+    id:"b1", title:"Word Sound Power", venue:"BAM (Brooklyn Academy of Music)", category:"Music",
+    date:"2026-04-24", time:"8:00 PM", price:"$25–$65",
+    blurb:"A two-night celebration of dub poetry, reggae, and the radical spoken word tradition rooted in Jamaica and the UK. Running April 24–25 at BAM.",
     url:"https://www.bam.org", addedBy:"system", going:[], interested:[],
   },
   {
@@ -339,6 +345,18 @@ const SEED_EVENTS = [
     id:"b4", title:"Long Play Festival 2026", venue:"BAM (Brooklyn Academy of Music)", category:"Music",
     date:"2026-04-30", time:"7:00 PM", price:"$20–$60",
     blurb:"Bang on a Can's boundary-breaking festival returns to BAM, featuring a Steve Reich marathon celebrating his 90th birthday. Over 50 concerts across three days of new music in downtown Brooklyn.",
+    url:"https://www.bam.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"b8", title:"The Post Office — Opera", venue:"BAM (Brooklyn Academy of Music)", category:"Opera",
+    date:"2026-05-16", time:"7:30 PM", price:"$30–$110",
+    blurb:"Rabindranath Tagore's tender, life-affirming play reimagined as a chamber opera. Running May 16–21 at BAM. A meditation on childhood, imagination, and the longing for freedom.",
+    url:"https://www.bam.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"b9", title:"I'm Almost There", venue:"BAM (Brooklyn Academy of Music)", category:"Theater",
+    date:"2026-06-09", time:"7:30 PM", price:"$30–$95",
+    blurb:"A sweeping new production running June 9–28 at BAM. An unmissable extended engagement for one of the season's most anticipated downtown theater works.",
     url:"https://www.bam.org", addedBy:"system", going:[], interested:[],
   },
   {
@@ -402,15 +420,27 @@ const SEED_EVENTS = [
 
   // ── NEW YORK LIVE ARTS ────────────────────────────────────────────────
   {
-    id:"nyla1", title:"CLYMOVE: 6th Anniversary Season", venue:"New York Live Arts", category:"Dance",
-    date:"2026-04-09", time:"7:30 PM", price:"$15–$35",
-    blurb:"CLYMOVE's three-day anniversary celebration at New York Live Arts — honoring six years of bold artistry, community building, and creative risk-taking. One of Chelsea's most exciting independent companies.",
+    id:"nyla1", title:"In/Between 2026", venue:"New York Live Arts", category:"Performance Art",
+    date:"2026-04-06", time:"Various", price:"$15–$35",
+    blurb:"New York Live Arts' signature multi-month series running April 6 through June 14. In/Between gathers artists working at the edges of dance, performance, and visual art — one of Chelsea's most essential ongoing programs.",
     url:"https://newyorklivearts.org", addedBy:"system", going:[], interested:[],
   },
   {
-    id:"nyla2", title:"Ariel Rivka Dance: Spring Season", venue:"New York Live Arts", category:"Dance",
-    date:"2026-04-22", time:"7:30 PM", price:"$15–$35",
-    blurb:"A cathartic journey through identity, authenticity, and the courage it takes to be seen. Three works performed to original live music, each score performed by its composer. Intimate and powerful.",
+    id:"nyla2", title:"Fresh Tracks 2026", venue:"New York Live Arts", category:"Dance",
+    date:"2026-05-15", time:"7:30 PM", price:"$15–$35",
+    blurb:"NYLA's beloved incubator for emerging choreographers. Two nights (May 15–16) of short works by artists in the Fresh Tracks residency — always one of the most surprising and energizing events of the season.",
+    url:"https://newyorklivearts.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"nyla3", title:"NYLA Spring Gala", venue:"New York Live Arts", category:"Performance Art",
+    date:"2026-05-18", time:"7:00 PM", price:"Check site",
+    blurb:"New York Live Arts' annual spring gala — an evening of performance and celebration supporting one of NYC's most vital independent dance organizations.",
+    url:"https://newyorklivearts.org", addedBy:"system", going:[], interested:[],
+  },
+  {
+    id:"nyla4", title:"Memory Fleet — Jasmine Hearn", venue:"New York Live Arts", category:"Dance",
+    date:"2026-06-11", time:"7:30 PM", price:"$15–$35",
+    blurb:"Jasmine Hearn's Memory Fleet is a deeply physical and emotionally resonant work exploring the body as an archive of collective and personal history. Running June 11–13 at NYLA.",
     url:"https://newyorklivearts.org", addedBy:"system", going:[], interested:[],
   },
   // ── METROPOLITAN OPERA ───────────────────────────────────────────────
@@ -539,15 +569,15 @@ const SEED_EVENTS = [
   {
     id:"sk1", title:"A.I.M by Kyle Abraham: Cassette Vol. 1",
     venue:"NYU Skirball Center", category:"Dance",
-    date:"2026-04-17", time:"7:30 PM", price:"$30–$75",
+    date:"2026-04-16", time:"7:30 PM", price:"$30–$75",
     blurb:"Weaving together the pop, R&B, and New Wave sounds of his youth, Kyle Abraham crafts a work moving between camp and critique — honoring influences from Prince to Trisha Brown. Ballet technique meets release-based articulation in a hybrid movement language speaking to the non-monolithic Black experience.",
     url:"https://nyuskirball.org", addedBy:"system", going:[], interested:[],
   },
   {
-    id:"sk2", title:"Jan Martens: THE DOG DAYS ARE OVER 2.0",
-    venue:"NYU Skirball Center", category:"Dance",
-    date:"2026-04-23", time:"7:30 PM", price:"$30–$75",
-    blurb:"Belgian choreographer Jan Martens brings his explosive work to Skirball. Eight dancers push limits of endurance through a hypnotic cycle of jumps with little music and no escape. Strips dance down to its purest, most brutal form — precision and exhaustion collide.",
+    id:"sk2", title:"NYC Gay Men's Chorus: Harmony in Motion",
+    venue:"NYU Skirball Center", category:"Music",
+    date:"2026-04-24", time:"7:30 PM", price:"$30–$75",
+    blurb:"The NYC Gay Men's Chorus — one of the world's most celebrated LGBTQ+ choral ensembles — performs at NYU Skirball. Running April 24–25. A joyful, powerful evening of choral music and community.",
     url:"https://nyuskirball.org", addedBy:"system", going:[], interested:[],
   },
   {
